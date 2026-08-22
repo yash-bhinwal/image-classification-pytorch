@@ -83,10 +83,6 @@ class CNN(nn.Module):
 
             nn.ReLU(),
 
-            nn.Dropout(
-                p=0.5
-            ),
-
             nn.Linear(
                 128,
                 10
