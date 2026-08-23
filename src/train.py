@@ -10,7 +10,7 @@ from model import CNN
 # Transforms
 # -------------------------
 
-# NO DATA AUGMENTATION
+# No data augmentation
 train_transform = transforms.ToTensor()
 test_transform = transforms.ToTensor()
 
@@ -98,15 +98,31 @@ model = CNN()
 
 
 # -------------------------
-# Loss and Optimizer
+# Loss
 # -------------------------
 
 loss_fn = nn.CrossEntropyLoss()
+
+
+# -------------------------
+# Optimizer
+# -------------------------
 
 optimizer = torch.optim.Adam(
     model.parameters(),
     lr=0.001,
     weight_decay=0.0001
+)
+
+
+# -------------------------
+# Learning Rate Scheduler
+# -------------------------
+
+scheduler = torch.optim.lr_scheduler.StepLR(
+    optimizer,
+    step_size=2,
+    gamma=0.5
 )
 
 
@@ -129,7 +145,7 @@ for epoch in range(num_epochs):
         # Forward pass
         outputs = model(images)
 
-        # Loss
+        # Calculate loss
         loss = loss_fn(outputs, labels)
 
         # Predictions
@@ -147,9 +163,10 @@ for epoch in range(num_epochs):
         # Backpropagation
         loss.backward()
 
-        # Update parameters
+        # Update model parameters
         optimizer.step()
 
+        # Track loss
         total_loss += loss.item()
 
 
@@ -157,16 +174,12 @@ for epoch in range(num_epochs):
     # Training Metrics
     # -------------------------
 
-    average_loss = total_loss / len(train_loader)
+    average_loss = (
+        total_loss / len(train_loader)
+    )
 
     train_accuracy = (
         100 * train_correct / train_total
-    )
-
-    print(
-        f"Epoch [{epoch + 1}/{num_epochs}], "
-        f"Average Loss: {average_loss:.4f}, "
-        f"Training Accuracy: {train_accuracy:.2f}%"
     )
 
 
@@ -185,7 +198,10 @@ for epoch in range(num_epochs):
 
             outputs = model(images)
 
-            _, predicted = torch.max(outputs, 1)
+            _, predicted = torch.max(
+                outputs,
+                1
+            )
 
             val_total += labels.size(0)
 
@@ -198,10 +214,28 @@ for epoch in range(num_epochs):
         100 * val_correct / val_total
     )
 
+
+    # -------------------------
+    # Current Learning Rate
+    # -------------------------
+
+    current_lr = optimizer.param_groups[0]["lr"]
+
+
     print(
-        f"Validation Accuracy: "
-        f"{val_accuracy:.2f}%"
+        f"Epoch [{epoch + 1}/{num_epochs}], "
+        f"Average Loss: {average_loss:.4f}, "
+        f"Training Accuracy: {train_accuracy:.2f}%, "
+        f"Validation Accuracy: {val_accuracy:.2f}%, "
+        f"Learning Rate: {current_lr:.6f}"
     )
+
+
+    # -------------------------
+    # Update Learning Rate
+    # -------------------------
+
+    scheduler.step()
 
 
 # -------------------------
@@ -219,7 +253,10 @@ with torch.no_grad():
 
         outputs = model(images)
 
-        _, predicted = torch.max(outputs, 1)
+        _, predicted = torch.max(
+            outputs,
+            1
+        )
 
         test_total += labels.size(0)
 
@@ -231,6 +268,7 @@ with torch.no_grad():
 test_accuracy = (
     100 * test_correct / test_total
 )
+
 
 print(
     f"Final Test Accuracy: "
