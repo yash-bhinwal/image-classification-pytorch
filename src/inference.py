@@ -1,3 +1,5 @@
+import os
+
 import mlflow
 import mlflow.pytorch
 import torch
@@ -10,11 +12,14 @@ from torchvision import transforms
 # MLflow connection
 # ------------------------------------------------------------
 
-mlflow.set_tracking_uri(
-    "http://127.0.0.1:5000"
+MLFLOW_TRACKING_URI = os.getenv(
+    "MLFLOW_TRACKING_URI",
+    "http://127.0.0.1:5001"
 )
 
-
+mlflow.set_tracking_uri(
+    MLFLOW_TRACKING_URI
+)
 # ------------------------------------------------------------
 # Model Registry
 # ------------------------------------------------------------
