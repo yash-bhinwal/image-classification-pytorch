@@ -10,8 +10,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 
-from model import CNN
-
+from src.model import CNN
 
 # ============================================================
 # Reproducibility
@@ -507,6 +506,16 @@ with mlflow.start_run(
         test_total
     )
 
+
+    # ========================================================
+    # MLflow: Log PyTorch Model
+    # ========================================================
+
+    mlflow.pytorch.log_model(
+        pytorch_model=model,
+        artifact_path="model",
+        registered_model_name="CIFAR10Classifier"
+    )
 
     # ========================================================
     # MLflow: Final Metrics

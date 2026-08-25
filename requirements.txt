@@ -3,3 +3,8 @@ torchvision
 numpy<2
 matplotlib
 jupyter
+mlflow
+fastapi
+uvicorn
+python-multipart
+Pillow

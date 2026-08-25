@@ -21,3 +21,6 @@ models/
 # MLflow local tracking
 mlflow.db
 mlruns/
+
+# Local inference test images
+data/sample_images/
