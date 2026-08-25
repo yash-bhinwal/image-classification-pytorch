@@ -17,3 +17,7 @@ models/
 
 # macOS
 .DS_Store
+
+# MLflow local tracking
+mlflow.db
+mlruns/
