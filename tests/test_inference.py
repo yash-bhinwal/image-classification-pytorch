@@ -1,8 +1,11 @@
+import pytest
+
 from PIL import Image
 
 from src.inference import predict_image
 
 
+@pytest.mark.integration
 def test_predict_image_returns_valid_output():
 
     # Create a dummy RGB image
