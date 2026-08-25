@@ -3,13 +3,18 @@ from io import BytesIO
 from fastapi import FastAPI, File, UploadFile
 from PIL import Image
 
-from src.inference import predict_image
 
 app = FastAPI(
     title="CIFAR-10 Image Classifier",
     description="PyTorch CIFAR-10 classifier served through FastAPI",
     version="1.0.0"
 )
+
+
+def predict_image(image):
+    from src.inference import predict_image as run_prediction
+
+    return run_prediction(image)
 
 
 @app.get("/")

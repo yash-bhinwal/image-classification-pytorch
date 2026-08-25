@@ -1,23 +1,19 @@
 import pytest
-
 from PIL import Image
-
-from src.inference import predict_image
 
 
 @pytest.mark.integration
 def test_predict_image_returns_valid_output():
 
-    # Create a dummy RGB image
+    from src.inference import predict_image
+
     image = Image.new(
         "RGB",
         (32, 32),
         color="white"
     )
 
-    result = predict_image(
-        image
-    )
+    result = predict_image(image)
 
     assert "class" in result
     assert "confidence" in result
@@ -33,3 +29,4 @@ def test_predict_image_returns_valid_output():
     )
 
     assert 0.0 <= result["confidence"] <= 1.0
+
