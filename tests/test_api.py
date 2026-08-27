@@ -24,19 +24,10 @@ def test_health_endpoint():
 @patch("src.api.predict_image")
 def test_predict_endpoint(mock_predict_image):
 
-    # --------------------------------------------------------
-    # Fake model prediction
-    # --------------------------------------------------------
-
     mock_predict_image.return_value = {
         "class": "cat",
         "confidence": 0.95
     }
-
-
-    # --------------------------------------------------------
-    # Create fake image
-    # --------------------------------------------------------
 
     image = Image.new(
         "RGB",
@@ -53,11 +44,6 @@ def test_predict_endpoint(mock_predict_image):
 
     image_bytes.seek(0)
 
-
-    # --------------------------------------------------------
-    # Call API
-    # --------------------------------------------------------
-
     response = client.post(
         "/predict",
         files={
@@ -69,11 +55,6 @@ def test_predict_endpoint(mock_predict_image):
         }
     )
 
-
-    # --------------------------------------------------------
-    # Assertions
-    # --------------------------------------------------------
-
     assert response.status_code == 200
 
     data = response.json()
@@ -82,4 +63,26 @@ def test_predict_endpoint(mock_predict_image):
     assert data["predicted_class"] == "cat"
     assert data["confidence"] == 0.95
 
+    assert "latency_ms" in data
+
     mock_predict_image.assert_called_once()
+
+
+def test_predict_rejects_invalid_image():
+
+    response = client.post(
+        "/predict",
+        files={
+            "file": (
+                "not-an-image.txt",
+                b"this is definitely not an image",
+                "text/plain"
+            )
+        }
+    )
+
+    assert response.status_code == 400
+
+    assert response.json() == {
+        "detail": "Uploaded file is not a valid image"
+    }
