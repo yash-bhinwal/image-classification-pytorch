@@ -19,6 +19,7 @@ RUN pip install \
     -r requirements-serving.txt
 
 COPY src/ ./src/
+COPY release/ ./release/
 
 EXPOSE 8000
 

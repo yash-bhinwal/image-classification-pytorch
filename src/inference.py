@@ -1,36 +1,21 @@
 import os
 
-import mlflow
-import mlflow.pytorch
 import torch
 
 from PIL import Image
 from torchvision import transforms
 
+from src.model import CNN
+
 
 # ------------------------------------------------------------
-# MLflow connection
+# Model configuration
 # ------------------------------------------------------------
 
-MLFLOW_TRACKING_URI = os.getenv(
-    "MLFLOW_TRACKING_URI",
-    "http://127.0.0.1:5001"
+MODEL_PATH = os.getenv(
+    "MODEL_PATH",
+    "release/champion_model.pth"
 )
-
-mlflow.set_tracking_uri(
-    MLFLOW_TRACKING_URI
-)
-# ------------------------------------------------------------
-# Model Registry
-# ------------------------------------------------------------
-
-MODEL_URI = "models:/CIFAR10Classifier@champion"
-
-model = mlflow.pytorch.load_model(
-    MODEL_URI
-)
-
-model.eval()
 
 
 # ------------------------------------------------------------
@@ -62,24 +47,54 @@ transform = transforms.Compose([
 
 
 # ------------------------------------------------------------
-# Prediction function
+# Lazy model loading
 # ------------------------------------------------------------
 
-def predict_image(image: Image.Image):
+_model = None
+
+
+def get_model():
+
+    global _model
+
+    if _model is None:
+
+        model = CNN()
+
+        model.load_state_dict(
+            torch.load(
+                MODEL_PATH,
+                map_location="cpu",
+                weights_only=True
+            )
+        )
+
+        model.eval()
+
+        _model = model
+
+    return _model
+
+
+# ------------------------------------------------------------
+# Prediction
+# ------------------------------------------------------------
+
+def predict_image(
+    image: Image.Image
+):
+
+    model = get_model()
 
     image = image.convert("RGB")
 
-    image_tensor = transform(
-        image
-    )
+    image_tensor = transform(image)
 
     image_tensor = image_tensor.unsqueeze(0)
 
     with torch.no_grad():
 
-        outputs = model(
-            image_tensor
-        )
+        outputs = model(image_tensor)
 
         probabilities = torch.softmax(
             outputs,
